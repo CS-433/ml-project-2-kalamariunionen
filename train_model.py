@@ -1,0 +1,55 @@
+
+from torchvision import models
+from torch import nn
+import torch
+
+def train_resnet18(train_dataset, val_dataset):
+
+    model = models.resnet18(pretrained=True)  # Use smaller versions like resnet18 for faster fine-tuning
+    model.fc = nn.Linear(512, 3)
+
+    criterion = nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+    for param in model.parameters():
+        param.requires_grad = False
+
+    # Unfreeze the final fully connected layer (and any other layers you want to fine-tune)
+    for param in model.fc.parameters():
+        param.requires_grad = True
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=0)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=0)
+
+    num_epochs = 5
+    for epoch in range(num_epochs):
+        model.train()  # Set the model to training mode
+        running_loss = 0.0
+        for inputs, targets in train_loader:  # Assuming `train_loader` is your data loader
+            optimizer.zero_grad()  # Zero the gradients
+
+            outputs = model(inputs)  # Forward pass
+            loss = criterion(outputs, targets)  # Calculate loss
+            loss.backward()  # Backpropagate
+
+            optimizer.step()  # Update model parameters
+
+            running_loss += loss.item()
+        print(f"Epoch {epoch+1}, Loss: {running_loss/len(train_loader)}")
+
+    model.eval()
+    val_loss = 0.0
+
+    output_colors = []
+    target_colors = []
+    with torch.no_grad():  # No gradients needed for evaluation
+        for inputs, targets in val_loader:  # Assuming `val_loader` is your validation data loader
+            outputs = model(inputs)
+            output_colors.append(outputs)
+            target_colors.append(targets)
+            loss = criterion(outputs, targets)
+            val_loss += loss.item()
+
+    torch.save(model.state_dict(), 'model_20.pth')
+    return output_colors,target_colors,val_loss
+
