@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # Transformations
     transform = transforms.Compose([
-        transforms.Resize((256, 256)),  # Resize images and masks to a fixed size
+        transforms.Resize((224, 224)),  # Resize images and masks to a fixed size
         transforms.ToTensor()          # Convert images to tensors
     ])
 
