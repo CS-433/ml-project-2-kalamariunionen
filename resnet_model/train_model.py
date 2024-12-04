@@ -28,7 +28,7 @@ def train_resnet18(train_dataset, val_dataset):
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=0)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=0)
 
-    num_epochs = 1
+    num_epochs = 10
     for epoch in range(num_epochs):
         model.train()  # Set the model to training mode
         running_loss = 0.0
