@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from PIL import Image, UnidentifiedImageError
 
 
-class ImageLabelDataset(Dataset):
+class ImageLabelDataset(Dataset): 
     
     def __init__(self, images_dir,df, transform=None, split='train'):
         self.images_dir = images_dir

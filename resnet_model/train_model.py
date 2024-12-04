@@ -5,8 +5,15 @@ import torch
 
 def train_resnet18(train_dataset, val_dataset):
 
+    device = ("cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
+    else "cpu")
+
     model = models.resnet18(pretrained=True)  # Use smaller versions like resnet18 for faster fine-tuning
     model.fc = nn.Linear(512, 3)
+    model = model.to(device)
 
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -25,11 +32,12 @@ def train_resnet18(train_dataset, val_dataset):
     for epoch in range(num_epochs):
         model.train()  # Set the model to training mode
         running_loss = 0.0
-        for inputs, targets in train_loader:  # Assuming `train_loader` is your data loader
+        for X, y in train_loader: 
+            X, y = X.to(device), y.to(device)
             optimizer.zero_grad()  # Zero the gradients
 
-            outputs = model(inputs)  # Forward pass
-            loss = criterion(outputs, targets)  # Calculate loss
+            y_pred = model(X)  # Forward pass
+            loss = criterion(y_pred, y)  # Calculate loss
             loss.backward()  # Backpropagate
 
             optimizer.step()  # Update model parameters
