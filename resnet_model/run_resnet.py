@@ -14,7 +14,7 @@ from train_model import *
 
 if __name__ == '__main__':
 
-    path_df = '../../data/AntProject/colour_ants.csv'
+    path_df = '../colour_ants.csv'
     images_dir = '../../data/AntProject/original'
 
     #Filter out names which are in both sets 
