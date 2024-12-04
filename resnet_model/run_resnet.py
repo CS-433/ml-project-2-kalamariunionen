@@ -14,6 +14,10 @@ from train_model import *
 
 if __name__ == '__main__':
 
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+        print(f"Cuda is availible using device '{device}'")
+
     path_df = '../colour_ants.csv'
     images_dir = '../../data/AntProject/original'
 
