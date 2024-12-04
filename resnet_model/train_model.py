@@ -51,11 +51,12 @@ def train_resnet18(train_dataset, val_dataset):
     output_colors = []
     target_colors = []
     with torch.no_grad():  # No gradients needed for evaluation
-        for inputs, targets in val_loader:  # Assuming `val_loader` is your validation data loader
-            outputs = model(inputs)
-            output_colors.append(outputs)
-            target_colors.append(targets)
-            loss = criterion(outputs, targets)
+        for X, y in val_loader:  # Assuming `val_loader` is your validation data loader
+            X, y = X.to(device), y.to(device)
+            y_pred = model(X)
+            output_colors.append(y_pred)
+            target_colors.append(y)
+            loss = criterion(y_pred, y)
             val_loss += loss.item()
 
     torch.save(model.state_dict(), 'model_20.pth')
