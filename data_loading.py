@@ -1,16 +1,10 @@
 import os
 import torch
 from torch.utils.data import Dataset
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 
 class ImageLabelDataset(Dataset):
-
-    SPLITS = {
-            'train': list(range(0, 2000)), 
-            'val':   list(range(2000, 2100)),
-            'test':  list(range(2100, 2200))
-        }
     
     def __init__(self, images_dir,df, transform=None, split='train'):
         self.images_dir = images_dir
@@ -35,6 +29,20 @@ class ImageLabelDataset(Dataset):
             row = df.iloc[imgIndex]
             imgName = os.path.join(images_dir, row['original_file'])
 
+            if not os.path.exists(imgName):
+                print(f"File not found: {imgName}")
+                continue
+            if os.path.getsize(imgName) == 0:
+                print(f"File is empty: {imgName}")
+                continue
+            try:
+                with Image.open(imgName) as img:  # Open to verify it's a valid image
+                    img.verify()
+            
+            except (IOError, UnidentifiedImageError):
+                print(f"Invalid image file: {imgName}")
+                continue
+
             rgb_tensor = torch.tensor((row['r_thorax'], row['g_thorax'], row['b_thorax']), dtype=torch.float32)
 
             self.data.append((
@@ -47,9 +55,15 @@ class ImageLabelDataset(Dataset):
     
     def __getitem__(self, index):
         imgName, label = self.data[index]
-        img = Image.open(imgName)#.convert('HSV')
 
-        if self.transforms is not None:
-            img = self.transforms(img)
+        if not os.path.exists(imgName):
+            print(f"File not found: {imgName}")
+        elif os.path.getsize(imgName) == 0:
+            print(f"File is empty: {imgName}")
+        else:
+            img = Image.open(imgName)#.convert('HSV')
+            if self.transforms is not None:
+                img = self.transforms(img)
         
+
         return img, label

@@ -11,6 +11,28 @@ def read_image_file_names(folder_path):
 
     return image_file_names
 
+def clean_file_name_jpg(file_names):
+    """
+    Extracting specimen name from jpg files
+    """
+    cleaned_file_names = [file.replace('_p_1.jpg', '') for file in file_names]
+
+    return cleaned_file_names
+
+def get_matching_specimen(df,file_names):
+    """
+    This function filters df by specimen so that only data in folder is contained in the rows.
+    """
+    
+    specimen_set = set(df['specimen'])  # Convert to a set for faster lookup
+
+    clean_file_names = clean_file_name_jpg(file_names)
+
+    image_file_specimen = clean_file_name_jpg(clean_file_names)
+
+    #Here we want to filter rows in df and not file names!
+    filtered_clean_file_names = [file for file in image_file_specimen if file in specimen_set]
+
 
 def read_images(file_names, folder_path_img):
 

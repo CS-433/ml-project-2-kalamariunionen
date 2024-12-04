@@ -53,3 +53,18 @@ def plot_color_result(output_colors,target_colors):
         axes[1].axis('off')  # Hide axes
 
         plt.show()
+
+def plot_ant_colors(df):
+
+    fig = plt.figure(figsize = (10, 7))
+    ax = plt.axes(projection ="3d")
+
+    colors = list(zip(df['r_thorax']/255, df['g_thorax']/255, df['b_thorax']/255))
+
+    
+    # Creating plot
+    ax.scatter3D(df['r_thorax'], df['g_thorax'], df['b_thorax'], color = colors)
+    plt.title("simple 3D scatter plot")
+    
+    # show plot
+    plt.show()

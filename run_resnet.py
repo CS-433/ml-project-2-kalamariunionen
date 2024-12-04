@@ -17,7 +17,24 @@ if __name__ == '__main__':
     path_df = '/Volumes/T7 Shield/AntProject/colour_ants.csv'
     images_dir = '/Volumes/T7 Shield/AntProject/original'
 
+    #Filter out names which are in both sets 
+
     df = pd.read_csv(path_df)
+
+    specimen_set = set(df['specimen'])  # Convert to a set for faster lookup
+
+    image_file_names = read_image_file_names(images_dir)
+
+    image_file_set = set(image_file_names)
+
+    # Filter the DataFrame by checking if 'original_file' is in image_file_set
+    filtered_df = df[df['original_file'].isin(image_file_set)]
+
+    #No distinct clusters of colors! 
+    #It would be interesting to just sample the background of images as well to see if we could separate 
+    #the ant from the background.
+    
+    #plot_ant_colors(df)
 
     # Transformations
     transform = transforms.Compose([
@@ -25,8 +42,8 @@ if __name__ == '__main__':
         transforms.ToTensor()          # Convert images to tensors
     ])
 
-    train_dataset = ImageLabelDataset(images_dir,df,transform, split='train')
-    val_dataset = ImageLabelDataset(images_dir,df,transform, split='val')
+    train_dataset = ImageLabelDataset(images_dir,filtered_df,transform, split='train')
+    val_dataset = ImageLabelDataset(images_dir,filtered_df,transform, split='val')
 
     print(f"Train dataset length {len(train_dataset)}")
     print(f"Validation dataset length {len(val_dataset)}")
@@ -46,8 +63,7 @@ if __name__ == '__main__':
     df_results = pd.DataFrame(data_results)
 
     # Save to CSV
-    df_results.to_csv('output.csv', index=False)
-        
+    df_results.to_csv('output_full_data.csv', index=False)
 
 #Träna 1 epoch i interactive mode och se hur lång tid det tar
 #Tensor boardlog?? 
