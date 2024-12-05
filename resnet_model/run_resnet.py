@@ -10,7 +10,6 @@ from read_data import *
 from data_loading import *
 from plot import *
 from train_model import *
-import pickle
 
 
 if __name__ == '__main__':
@@ -49,9 +48,4 @@ if __name__ == '__main__':
 
     output_colors,target_colors,val_loss = train_resnet18(train_dataset, val_dataset)
 
- 
-    with open('output_colors.pkl', 'wb') as f:
-        pickle.dump(output_colors, f)
-    
-    with open('target_colors.pkl', 'wb') as f:
-        pickle.dump(target_colors, f)
+	
