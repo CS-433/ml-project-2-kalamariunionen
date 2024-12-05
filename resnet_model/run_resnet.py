@@ -10,6 +10,7 @@ from read_data import *
 from data_loading import *
 from plot import *
 from train_model import *
+import pickle
 
 
 if __name__ == '__main__':
@@ -34,12 +35,6 @@ if __name__ == '__main__':
     # Filter the DataFrame by checking if 'original_file' is in image_file_set
     filtered_df = df[df['original_file'].isin(image_file_set)]
 
-    #No distinct clusters of colors! 
-    #It would be interesting to just sample the background of images as well to see if we could separate 
-    #the ant from the background.
-    
-    #plot_ant_colors(df)
-
     # Transformations
     transform = transforms.Compose([
         transforms.Resize((224, 224)),  # Resize images and masks to a fixed size
@@ -54,23 +49,9 @@ if __name__ == '__main__':
 
     output_colors,target_colors,val_loss = train_resnet18(train_dataset, val_dataset)
 
-    data_results = {
-    'output_colors_r': [color[0] for color in output_colors],
-    'output_colors_g': [color[1] for color in output_colors],
-    'output_colors_b': [color[2] for color in output_colors],
-    'target_colors_r': [color[0] for color in target_colors],
-    'target_colors_g': [color[1] for color in target_colors],
-    'target_colors_b': [color[2] for color in target_colors],
-    'val_loss': val_loss
-    }
-
-    df_results = pd.DataFrame(data_results)
-
-    # Save to CSV
-    df_results.to_csv('output_full_data.csv', index=False)
-
-#Träna 1 epoch i interactive mode och se hur lång tid det tar
-#Tensor boardlog?? 
-#Spara modellen efter du har tränat, checkpoint directory
-#Spara loss, validation loss, mean square error for validation.
-#Sedan analysera exempel lokalt, hur ser färgerna ut? 
+ 
+    with open('output_colors.pkl', 'wb') as f:
+        pickle.dump(output_colors, f)
+    
+    with open('target_colors.pkl', 'wb') as f:
+        pickle.dump(target_colors, f)

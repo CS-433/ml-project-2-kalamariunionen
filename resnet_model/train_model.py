@@ -28,7 +28,7 @@ def train_resnet18(train_dataset, val_dataset):
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=0)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=0)
 
-    num_epochs = 10
+    num_epochs = 1
     for epoch in range(num_epochs):
         model.train()  # Set the model to training mode
         running_loss = 0.0
@@ -59,6 +59,6 @@ def train_resnet18(train_dataset, val_dataset):
             loss = criterion(y_pred, y)
             val_loss += loss.item()
 
-    torch.save(model.state_dict(), 'model_20.pth')
+    torch.save(model.state_dict(), 'model_epochs_10.pth')
     return output_colors,target_colors,val_loss
 
