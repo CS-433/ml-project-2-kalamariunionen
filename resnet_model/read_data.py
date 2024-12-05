@@ -1,5 +1,7 @@
 import os
 from skimage.io import imread
+import numpy as np
+import pickle
 
 
 def read_image_file_names(folder_path):
@@ -50,4 +52,17 @@ def read_images(file_names, folder_path_img):
             print(f"Error reading {file}: {e}")
 
     return images
+
+
+def save_data(file_name,data):
+    try:
+        data_np = [tensor.cpu().numpy() for tensor in data]  # Convert to numpy
+        data_np = np.stack(data_np)  # Stack into a single array
+        np.save(file_name, data_np)
+    
+    except ValueError as e:
+        print(f"Error: {e}. Ensure that all arrays have the same shape.")
+        pickle_file_name = file_name.replace('.npy', '.pkl')
+        with open(pickle_file_name, 'wb') as f:
+            pickle.dump(data, f)
 

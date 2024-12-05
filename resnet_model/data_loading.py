@@ -6,7 +6,7 @@ from PIL import Image, UnidentifiedImageError
 
 class ImageLabelDataset(Dataset): 
     
-    def __init__(self, images_dir,df, transform=None, split='train'):
+    def __init__(self, images_dir,df,transform=None, split='train'):
         self.images_dir = images_dir
         self.transforms = transform
 
@@ -42,8 +42,9 @@ class ImageLabelDataset(Dataset):
             except (IOError, UnidentifiedImageError):
                 print(f"Invalid image file: {imgName}")
                 continue
-
-            rgb_tensor = torch.tensor((row['r_thorax'], row['g_thorax'], row['b_thorax']), dtype=torch.float32)
+            
+            rgb_tensor = torch.tensor((row['r_thorax'], row['g_thorax'], 
+                                       row['b_thorax']), dtype=torch.float32)
 
             self.data.append((
                 imgName,
@@ -65,5 +66,4 @@ class ImageLabelDataset(Dataset):
             if self.transforms is not None:
                 img = self.transforms(img)
         
-
         return img, label

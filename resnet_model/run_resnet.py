@@ -1,10 +1,7 @@
 
 import pandas as pd
-import numpy as np
 
 import torchvision.transforms as transforms
-from torchvision import models
-from torch import nn
 
 from read_data import *
 from data_loading import *
@@ -18,12 +15,23 @@ if __name__ == '__main__':
         device = torch.device('cuda')
         print(f"Cuda is availible using device '{device}'")
 
+    #path_df = '/Volumes/T7 Shield/AntProject/colour_ants.csv'
+    #images_dir = '/Volumes/T7 Shield/AntProject/original'
+
     path_df = '../colour_ants.csv'
     images_dir = '../../data/AntProject/original'
 
     #Filter out names which are in both sets 
 
+    mean_value = [0.485, 0.456, 0.406]
+    std_value= [0.229, 0.224, 0.225]
+
     df = pd.read_csv(path_df)
+
+    # Standardize the columns
+    df['r_thorax'] = df['r_thorax'] / 255.0
+    df['g_thorax'] = df['g_thorax'] / 255.0
+    df['b_thorax'] = df['b_thorax'] / 255.0
 
     specimen_set = set(df['specimen'])  # Convert to a set for faster lookup
 
@@ -36,8 +44,9 @@ if __name__ == '__main__':
 
     # Transformations
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),  # Resize images and masks to a fixed size
-        transforms.ToTensor()          # Convert images to tensors
+        transforms.Resize((224, 224)),  
+        transforms.ToTensor(),         
+        transforms.Normalize(mean=mean_value, std=std_value)  
     ])
 
     train_dataset = ImageLabelDataset(images_dir,filtered_df,transform, split='train')
@@ -51,7 +60,14 @@ if __name__ == '__main__':
     output_colors_np = [tensor.cpu().numpy() for tensor in output_colors]
     target_colors_np = [tensor.cpu().numpy() for tensor in target_colors]
 
-    np.save('output_colors.npy', np.array(output_colors_np))
-    np.save('target_colors.npy', np.array(target_colors_np))
+    save_data('output_colors.npy',output_colors)
+    save_data('target_colors.npy',target_colors)
+
+
+
+
+    
+
+    
 
 	
