@@ -48,4 +48,10 @@ if __name__ == '__main__':
 
     output_colors,target_colors,val_loss = train_resnet18(train_dataset, val_dataset)
 
+    output_colors_np = [tensor.cpu().numpy() for tensor in output_colors]
+    target_colors_np = [tensor.cpu().numpy() for tensor in target_colors]
+
+    np.save('output_colors.npy', np.array(output_colors_np))
+    np.save('target_colors.npy', np.array(target_colors_np))
+
 	
