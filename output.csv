@@ -1,2 +1,0 @@
-output_colors_r,output_colors_g,output_colors_b,target_colors_r,target_colors_g,target_colors_b,val_loss
-"tensor([2.6553, 4.3898, 3.3451])","tensor([3.1012, 4.3059, 3.9870])","tensor([2.6776, 4.5759, 3.6660])","tensor([37., 36., 42.])","tensor([159., 171., 187.])","tensor([104., 109., 149.])",8037.40087890625
