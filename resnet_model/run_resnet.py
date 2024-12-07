@@ -45,8 +45,8 @@ if __name__ == '__main__':
     # Transformations
     transform = transforms.Compose([
         transforms.Resize((224, 224)),  
-        transforms.ToTensor(),         
-        transforms.Normalize(mean=mean_value, std=std_value)  
+        transforms.ToTensor()#,         
+        #transforms.Normalize(mean=mean_value, std=std_value)  
     ])
 
     train_dataset = ImageLabelDataset(images_dir,filtered_df,transform, split='train')

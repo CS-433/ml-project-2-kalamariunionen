@@ -68,3 +68,16 @@ def plot_ant_colors(df):
     
     # show plot
     plt.show()
+
+def plot_results(color_array):
+    fig = plt.figure(figsize = (10, 7))
+    ax = plt.axes(projection ="3d")
+
+    colors = list(zip(color_array[:,0], color_array[:,1], color_array[:,2]))
+
+    # Creating plot
+    ax.scatter3D(color_array[:,0], color_array[:,1], color_array[:,2], color = colors)
+    plt.title("simple 3D scatter plot")
+    
+    # show plot
+    plt.show()

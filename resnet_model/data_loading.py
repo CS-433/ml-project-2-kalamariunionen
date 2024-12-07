@@ -19,9 +19,9 @@ class ImageLabelDataset(Dataset):
         val_end = train_end + int(total_size * val_ratio)
 
         SPLITS = {
-            'train': list(range(0, train_end)),
-            'val':   list(range(train_end, val_end)),
-            'test':  list(range(val_end, total_size))
+            'train': list(range(0, 100)),
+            'val':   list(range(100, 120)),
+            'test':  list(range(120, 140))
         }
 
         self.data = []
