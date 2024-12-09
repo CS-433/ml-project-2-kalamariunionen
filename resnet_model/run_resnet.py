@@ -2,6 +2,9 @@
 import pandas as pd
 
 import torchvision.transforms as transforms
+from itertools import product
+from datetime import datetime
+
 
 from read_data import *
 from data_loading import *
@@ -23,9 +26,6 @@ if __name__ == '__main__':
 
     #Filter out names which are in both sets 
 
-    mean_value = [0.485, 0.456, 0.406]
-    std_value= [0.229, 0.224, 0.225]
-
     df = pd.read_csv(path_df)
 
     # Standardize the columns
@@ -39,29 +39,76 @@ if __name__ == '__main__':
 
     image_file_set = set(image_file_names)
 
-    # Filter the DataFrame by checking if 'original_file' is in image_file_set
-    filtered_df = df[df['original_file'].isin(image_file_set)]
-
     # Transformations
     transform = transforms.Compose([
         transforms.Resize((224, 224)),  
-        transforms.ToTensor()#,         
-        #transforms.Normalize(mean=mean_value, std=std_value)  
+        transforms.ToTensor()
     ])
 
-    train_dataset = ImageLabelDataset(images_dir,filtered_df,transform, split='train')
-    val_dataset = ImageLabelDataset(images_dir,filtered_df,transform, split='val')
+    train_dataset = ImageLabelDataset(images_dir,df,transform, split='train')
+    val_dataset = ImageLabelDataset(images_dir,df,transform, split='val')
 
-    print(f"Train dataset length {len(train_dataset)}")
-    print(f"Validation dataset length {len(val_dataset)}")
+    #Running baseline model
+    hparams_baseline = {'lr': 0.0001}
+    baseline_model = nn.Sequential(
+            nn.Linear(512, 3),    
+            nn.Sigmoid())
+    
+    # Set the log directory
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    
+    #Creating directories for output
+    output_dirs = [
+        f'output_training/run_{current_time}/models',
+        f'output_training/run_{current_time}/target_colors',
+        f'output_training/run_{current_time}/output_colors'
+    ]
 
-    output_colors,target_colors,val_loss = train_resnet18(train_dataset, val_dataset)
+    for output_dir in output_dirs:
+        os.makedirs(output_dir, exist_ok=True)
+    
+    print('Running baseline model')
+    output_colors,target_colors,val_loss = train_resnet18(train_dataset, val_dataset,baseline_model,
+                                                          hparams_baseline,f'output_training/run_{current_time}/models/baseline_model_epochs_5.pth',num_epochs = 5)
 
-    output_colors_np = [tensor.cpu().numpy() for tensor in output_colors]
-    target_colors_np = [tensor.cpu().numpy() for tensor in target_colors]
+    save_data(f'output_training/run_{current_time}/output_colors/output_colors_baseline.npy',output_colors)
+    save_data(f'output_training/run_{current_time}/target_colors/target_colors_baseline.npy',target_colors)
 
-    save_data('output_colors.npy',output_colors)
-    save_data('target_colors.npy',target_colors)
+
+    #Adding layer to model and tuning more complex model
+    hparam_space = {
+        "lr": [0.001, 0.0001],
+        #"batch_size": [256, 512],
+        "nodes": [128, 256, 512]
+    }
+
+    # Generate combinations of hyperparameters
+    keys, values = zip(*hparam_space.items())
+    hparam_combinations = [dict(zip(keys, v)) for v in product(*values)]
+
+    # Perform tuning
+    best_loss = float('inf')
+    best_hparams = None
+    
+    #Tuning hyperparameters
+    for i, hparams in enumerate(hparam_combinations):
+        print(f"Testing hyperparameters: {hparams}")
+        
+        layers_model = nn.Sequential(
+            nn.Linear(512, hparams['nodes']),  
+            nn.ReLU(),            
+            nn.Linear(hparams['nodes'], 3),    
+            nn.Sigmoid())  
+        
+        output_colors,target_colors,val_loss = train_resnet18(train_dataset, val_dataset,layers_model,hparams,
+                                                              f'output_training/run_{current_time}/models/model{i}_epochs_5.pth', num_epochs = 5)
+
+        output_colors_np = [tensor.cpu().numpy() for tensor in output_colors]
+        target_colors_np = [tensor.cpu().numpy() for tensor in target_colors]
+
+        save_data(f'output_training/run_{current_time}/output_colors/output_colors_model{i}.npy',output_colors)
+        save_data(f'output_training/run_{current_time}/target_colors/target_colors_model{i}.npy',target_colors)
+
 
 
 
