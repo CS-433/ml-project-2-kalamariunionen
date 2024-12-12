@@ -45,13 +45,13 @@ def unique_mask_values(idx, mask_dir):
 
 
 class BasicDataset(Dataset):
-    def __init__(self, images_dir: str, mask_dir: str, scale: float = 1.0, binary_class: int = None):
+    def __init__(self, images_dir: str, mask_dir: str, scale: float = 1.0, binary_class: int = None, train: bool = True):
         self.images_dir = Path(images_dir)
         self.mask_dir = Path(mask_dir)
         assert 0 < scale <= 1, 'Scale must be between 0 and 1'
         self.scale = scale
         self.binary_class = binary_class  # Optional parameter for binary class separation
-
+        self.train = train  # New flag
 
         # # Gather IDs by extracting the numeric part from files starting with 'image_'
         # self.ids = [splitext(file)[0].replace('image_', '') 
@@ -199,11 +199,18 @@ class BasicDataset(Dataset):
         img = self.preprocess(self.mask_values, img, target_size=(256,256), is_mask=False)
         mask = self.preprocess(self.mask_values, mask, target_size=(256,256), is_mask=True, binary_class=self.binary_class)
 
-        # Apply synchronized augmentations
-        img, mask = self.apply_transforms(img, mask)
+        if self.train:
+            # Apply augmentations only on the training dataset
+            img, mask = self.apply_transforms(img, mask)
+            # Convert to tensors for training
+        
+         # Convert to tensors for both train and validation
+        img = torch.from_numpy(np.array(img)).float()
+        mask = torch.from_numpy(np.array(mask)).long()
+        
         return {
-            'image': img.clone().float().contiguous(),
-            'mask': mask.clone().long().contiguous()
+            'image': img.clone().contiguous(),
+            'mask': mask.clone().contiguous()
         }
     
         # return {
@@ -213,5 +220,5 @@ class BasicDataset(Dataset):
 
 
 class AntDataset(BasicDataset):
-    def __init__(self, images_dir, mask_dir, scale=1, binary_class=None):
-        super().__init__(images_dir, mask_dir, scale, binary_class)
+    def __init__(self, images_dir, mask_dir, scale=1, binary_class=None, train=True):
+        super().__init__(images_dir, mask_dir, scale, binary_class, train)

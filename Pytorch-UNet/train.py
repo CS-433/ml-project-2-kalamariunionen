@@ -43,14 +43,23 @@ def train_model(
     # 1. Create dataset
     try:
         binary_class = 1 if model.n_classes == 2 else None
-        dataset = AntDataset(dir_img, dir_mask, img_scale, binary_class=binary_class)
+        full_dataset = AntDataset(dir_img, dir_mask, img_scale, binary_class=binary_class, train=True)
     except (AssertionError, RuntimeError, IndexError):
-        dataset = BasicDataset(dir_img, dir_mask, img_scale)
+        full_dataset = BasicDataset(dir_img, dir_mask, img_scale, train=True)
 
     # 2. Split into train / validation partitions
-    n_val = int(len(dataset) * val_percent)
-    n_train = len(dataset) - n_val
-    train_set, val_set = random_split(dataset, [n_train, n_val], generator=torch.Generator().manual_seed(0))
+    n_val = int(len(full_dataset) * val_percent)
+    n_train = len(full_dataset) - n_val
+    train_set, val_set = random_split(full_dataset, [n_train, n_val], generator=torch.Generator().manual_seed(0))
+
+    if isinstance(full_dataset, AntDataset):
+        val_dataset = AntDataset(dir_img, dir_mask, img_scale, binary_class=binary_class, train=False)
+    else:
+        val_dataset = BasicDataset(dir_img, dir_mask, img_scale, train=False)
+    
+    # Get the exact indices for the val subset
+    val_indices = val_set.indices
+    val_set = torch.utils.data.Subset(val_dataset, val_indices)
 
     # 3. Create data loaders
     loader_args = dict(batch_size=batch_size, num_workers=os.cpu_count(), pin_memory=True)
@@ -81,7 +90,7 @@ def train_model(
     # optimizer = optim.RMSprop(model.parameters(),
     #                           lr=learning_rate, weight_decay=weight_decay, momentum=momentum, foreach=True)
     # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=5)  # goal: maximize Dice score
-    scheduler = OneCycleLR(optimizer, max_lr=1e-4, steps_per_epoch=len(train_loader), epochs=epochs)
+    scheduler = OneCycleLR(optimizer, max_lr=5e-4, steps_per_epoch=len(train_loader), epochs=epochs)
     grad_scaler = torch.cuda.amp.GradScaler(enabled=amp)
 
     criterion = nn.CrossEntropyLoss() if model.n_classes > 1 else nn.BCEWithLogitsLoss()
@@ -176,15 +185,15 @@ def train_model(
 
         if save_checkpoint:
             Path(dir_checkpoint).mkdir(parents=True, exist_ok=True)
-            checkpoint_path = dir_checkpoint / 'checkpoint2.pth'  # Single checkpoint file
+            checkpoint_path = dir_checkpoint / f'checkpoint_no_augmented.pth'  # Single checkpoint file
             torch.save(model.state_dict(), checkpoint_path)
             logging.info(f'Checkpoint saved at {checkpoint_path}')
 
 
 def get_args():
     parser = argparse.ArgumentParser(description='Train the UNet on images and target masks')
-    parser.add_argument('--epochs', '-e', metavar='E', type=int, default=25, help='Number of epochs')
-    parser.add_argument('--batch-size', '-b', dest='batch_size', metavar='B', type=int, default=3, help='Batch size')
+    parser.add_argument('--epochs', '-e', metavar='E', type=int, default=50, help='Number of epochs')
+    parser.add_argument('--batch-size', '-b', dest='batch_size', metavar='B', type=int, default=5, help='Batch size')
     parser.add_argument('--learning-rate', '-l', metavar='LR', type=float, default=1e-4,
                         help='Learning rate', dest='lr')
     parser.add_argument('--load', '-f', type=str, default=False, help='Load model from a .pth file')
