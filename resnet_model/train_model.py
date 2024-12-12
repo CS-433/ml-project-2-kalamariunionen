@@ -31,8 +31,8 @@ def train_resnet18(train_dataset, val_dataset,layers_model,hparams,model_name,nu
 
     writer = SummaryWriter()
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=512, shuffle=True, num_workers=0)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=512, shuffle=False, num_workers=0)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=0)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=0)
 
     model = load_model(layers_model,device)
 
