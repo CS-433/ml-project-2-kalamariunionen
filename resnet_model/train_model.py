@@ -4,11 +4,13 @@ from torch import nn
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
+import warnings
+
 
 def load_model(layers_model,device):
     model = models.resnet18(pretrained=False)
     #Loading weights from file
-    model.load_state_dict(torch.load('weights_resnet/resnet18_weights.pth', map_location=device))
+    model.load_state_dict(torch.load('weights_resnet/resnet18_weights.pth', map_location=device, weights_only=True))
     model.fc = layers_model
     model = model.to(device)
 
@@ -23,6 +25,11 @@ def load_model(layers_model,device):
 
 
 def train_resnet18(train_dataset, val_dataset,layers_model,hparams,model_name,num_epochs = 5):
+    # Suppressing warnings
+    warnings.filterwarnings("ignore", category=UserWarning, module="torchvision.models._utils")
+    warnings.filterwarnings("ignore", category=FutureWarning, module="torch.serialization")
+
+    #Setting seed
     torch.manual_seed(3)
 
     device = ("cuda"
@@ -83,4 +90,4 @@ def train_resnet18(train_dataset, val_dataset,layers_model,hparams,model_name,nu
     writer.close()
     torch.save(model.state_dict(), model_name)
 
-    return output_colors,target_colors,val_loss
+    return output_colors,target_colors

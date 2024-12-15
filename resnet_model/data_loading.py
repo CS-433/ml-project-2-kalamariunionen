@@ -15,17 +15,17 @@ class ImageLabelDataset(Dataset):
         train_end = int(total_size * train_ratio)
         val_end = train_end + int(total_size * val_ratio)
 
-        SPLITS = {
-            'train': list(range(0, 100)),
-           'val':   list(range(100, 120)),
-            'test':  list(range(120, 140))
-        }
-
         #SPLITS = {
-        #    'train': list(range(0, train_end)),
-        #   'val':   list(range(train_end, val_end)),
-        #    'test':  list(range(val_end, total_size))
+        #    'train': list(range(0, 100)),
+        #   'val':   list(range(100, 120)),
+        #    'test':  list(range(120, 140))
         #}
+
+        SPLITS = {
+            'train': list(range(0, train_end)),
+           'val':   list(range(train_end, val_end)),
+            'test':  list(range(val_end, total_size))
+        }
 
         self.data = []
         for imgIndex in SPLITS[split]:
@@ -48,8 +48,7 @@ class ImageLabelDataset(Dataset):
                 continue
             
             #Extracting target color
-            rgb_tensor = torch.tensor((row['r_thorax'], row['g_thorax'], 
-                                       row['b_thorax']), dtype=torch.float32)
+            rgb_tensor = torch.tensor((row['r'], row['g'],row['b']), dtype=torch.float32)
 
             self.data.append((
                 imgName,
