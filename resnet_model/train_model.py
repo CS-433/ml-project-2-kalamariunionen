@@ -6,7 +6,9 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 def load_model(layers_model,device):
-    model = models.resnet18(pretrained=True)
+    model = models.resnet18(pretrained=False)
+    #Loading weights from file
+    model.load_state_dict(torch.load('weights_resnet/resnet18_weights.pth', map_location=device))
     model.fc = layers_model
     model = model.to(device)
 
@@ -31,13 +33,13 @@ def train_resnet18(train_dataset, val_dataset,layers_model,hparams,model_name,nu
 
     writer = SummaryWriter()
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=0)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=0)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=hparams['batch_size'], shuffle=True, num_workers=0)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=hparams['batch_size'], shuffle=False, num_workers=0)
 
     model = load_model(layers_model,device)
 
     criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=hparams['lr'])# lr=0.001) 
+    optimizer = torch.optim.Adam(model.parameters(), lr=hparams['lr'])
 
     output_colors = []
     target_colors = []
@@ -47,8 +49,8 @@ def train_resnet18(train_dataset, val_dataset,layers_model,hparams,model_name,nu
         model.train()  # Set the model to training mode
         running_loss = 0.0
         for X, y in train_loader: 
-            X, y = X.to(device), y.to(device)
-            optimizer.zero_grad()
+            X, y = X.to(device), y.to(device) #Add tensors to devide
+            optimizer.zero_grad() #Set gradient to zero
 
             y_pred = model(X)
             loss = criterion(y_pred, y)
@@ -61,8 +63,8 @@ def train_resnet18(train_dataset, val_dataset,layers_model,hparams,model_name,nu
         writer.add_scalar("Loss/train", avg_train_loss, epoch)
         
         # Validation Loop
-        with torch.no_grad():  # No gradients needed for evaluation
-            model.eval()  # Set the model to evaluation mode
+        with torch.no_grad():  # No gradients needed for validation
+            model.eval() 
             val_loss = 0.0
             for X, y in val_loader:
                 X, y = X.to(device), y.to(device)

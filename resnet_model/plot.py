@@ -2,6 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+"""
+Update this code to plots for ResNET
+"""
+
 def plot_data_example(image, label):
     """
     
