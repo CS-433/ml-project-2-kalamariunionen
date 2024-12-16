@@ -77,7 +77,7 @@ def save_data(file_name,data):
             pickle.dump(data, f)
 
 
-def get_bodypart_rgb_values(df, body_part):
+def get_bodypart_rgb_values(df, body_part,column_name = 'original_file'):
     """
     Create a copy of the DataFrame and return only the scaled RGB values 
     for the specified body part.
@@ -100,7 +100,7 @@ def get_bodypart_rgb_values(df, body_part):
     b_col = f"b_{body_part}"
     
     # Copy of DataFrame with only relevant columns
-    df_color = df[['original_file',r_col, g_col, b_col]].copy()
+    df_color = df[[column_name,r_col, g_col, b_col]].copy()
     
     # Scale the RGB values to the range [0, 1]
     df_color[r_col] = df_color[r_col] / 255.0
