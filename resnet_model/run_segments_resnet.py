@@ -15,8 +15,8 @@ if torch.cuda.is_available():
     device = torch.device('cuda')
     print(f"Cuda is availible using device '{device}'")
 
-path_df = '/Users/lisavind/GitHub/ml-project-2-kalamariunionen/colour_ants.csv'
-images_dir = '/Volumes/T7 Shield/AntProject/magenta_ants'
+path_df = '../colour_ants.csv'
+images_dir = '../../data/AntProject/magenta_ants'
 
 body_parts = ['head','thorax','abdomen']
 
