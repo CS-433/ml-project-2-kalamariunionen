@@ -30,8 +30,8 @@ def parse_arguments():
                         help="Learning rate for the model (default: 0.001)")
     parser.add_argument('--batch_size', type=int, default=256,
                         help="Batch size for training (default: 256)")
-    parser.add_argument('--nodes', type=int, default=512,
-                        help="Number of nodes in the hidden layer (default: 512)")
+    parser.add_argument('--nodes', type=int, default=256,
+                        help="Number of nodes in the hidden layer (default: 256)")
 
     return parser.parse_args()
 
