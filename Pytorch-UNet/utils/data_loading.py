@@ -1,20 +1,29 @@
 import logging
-import numpy as np
-import torch
-from PIL import Image
-from functools import lru_cache
-from functools import partial
-from itertools import repeat
-from multiprocessing import Pool
 from os import listdir
 from os.path import splitext, isfile, join
 from pathlib import Path
-from torch.utils.data import Dataset
+
+from functools import partial
+from multiprocessing import Pool
+
+import numpy as np
+from PIL import Image
 from tqdm import tqdm
+
+import torch
+from torch.utils.data import Dataset
 import torchvision.transforms as T
 
-
 def load_image(filename):
+    """
+    Load an image from a file, supporting multiple formats (.npy, .pt, .pth, image files).
+
+    Args:
+        filename (str): Path to the image file.
+
+    Returns:
+        PIL.Image: The loaded image.
+    """
     ext = splitext(filename)[1]
     if ext == '.npy':
         return Image.fromarray(np.load(filename))
@@ -25,7 +34,20 @@ def load_image(filename):
 
 
 def unique_mask_values(idx, mask_dir):
-    # Construct the mask file name assuming the ID `idx` corresponds to a file mask_{idx}.*
+    """
+    Retrieve unique values from a mask file associated with a given ID.
+
+    Args:
+        idx (str): The ID of the mask file.
+        mask_dir (Path): Directory containing the mask files.
+
+    Returns:
+        np.ndarray: Unique values present in the mask.
+
+    Raises:
+        RuntimeError: If no mask or multiple masks are found for the given ID.
+        ValueError: If the mask does not have 2 or 3 dimensions.
+    """
     mask_files = list(mask_dir.glob(f'{idx}_p_msk.*'))
     if len(mask_files) != 1:
         raise RuntimeError(f'Either no mask or multiple masks found for the ID {idx}: {mask_files}')
@@ -45,29 +67,29 @@ def unique_mask_values(idx, mask_dir):
 
 
 class BasicDataset(Dataset):
+    """
+    Basic dataset class for loading images and masks for segmentation tasks.
+
+    Args:
+        images_dir (str): Directory containing the image files.
+        mask_dir (str): Directory containing the mask files.
+        scale (float): Scale factor for resizing images and masks.
+        binary_class (int): Optional class label for binary segmentation.
+        train (bool): Flag indicating whether the dataset is for training (True) or validation (False).
+    """
     def __init__(self, images_dir: str, mask_dir: str, scale: float = 1.0, binary_class: int = None, train: bool = True):
         self.images_dir = Path(images_dir)
         self.mask_dir = Path(mask_dir)
         assert 0 < scale <= 1, 'Scale must be between 0 and 1'
         self.scale = scale
         self.binary_class = binary_class  # Optional parameter for binary class separation
-        self.train = train  # New flag
-
-        # # Gather IDs by extracting the numeric part from files starting with 'image_'
-        # self.ids = [splitext(file)[0].replace('image_', '') 
-        #             for file in listdir(images_dir) 
-        #             if isfile(join(images_dir, file)) and file.startswith('image_')]
-
-        # if not self.ids:
-        #     raise RuntimeError(f'No input file found in {images_dir}, make sure you put your images there')
+        self.train = train
 
         # Gather IDs by extracting the base name before '_p_' from files
         self.ids = [file.split('_p_')[0] for file in listdir(images_dir) if isfile(join(images_dir, file))]
 
         if not self.ids:
             raise RuntimeError(f'No input file found in {images_dir}, make sure you put your images there')
-
-        logging.info(f'Creating dataset with {len(self.ids)} examples')
 
         logging.info(f'Creating dataset with {len(self.ids)} examples')
         logging.info('Scanning mask files to determine unique values')
@@ -93,7 +115,9 @@ class BasicDataset(Dataset):
         if not self.ids:
             raise RuntimeError('No valid masks found with exactly 5 unique values.')
 
-        logging.info(f'Creating dataset with {len(self.ids)} examples')
+        logging.info(f'Final dataset size: {len(self.ids)} examples')
+
+        # Set mask values for multi-class or binary segmentation
         if self.binary_class is not None:
             logging.info(f'Using binary segmentation mode for class: {self.binary_class}')
         else:
@@ -113,11 +137,26 @@ class BasicDataset(Dataset):
             # For binary mode, only two classes: 0 (background), 1 (target class)
             self.mask_values = [0, 1]
 
+
     def __len__(self):
         return len(self.ids)
 
+
     @staticmethod
     def preprocess(mask_values, pil_img, target_size=(256,256), is_mask=False, binary_class=None):
+        """
+        Preprocess an image or mask: resize and convert to the appropriate format.
+
+        Args:
+            mask_values (list): List of unique mask values.
+            pil_img (PIL.Image): The image or mask to preprocess.
+            target_size (tuple): Desired (width, height) for resizing.
+            is_mask (bool): Whether the input is a mask.
+            binary_class (int): Class label for binary segmentation.
+
+        Returns:
+            np.ndarray: Preprocessed image or mask.
+        """
         target_width, target_height = target_size
         assert target_width > 0 and target_height > 0, 'Target size must be positive.'
 
@@ -153,6 +192,7 @@ class BasicDataset(Dataset):
                 img = img / 255.0
             return img
 
+
     def apply_transforms(self, img, mask):
         # Convert NumPy arrays to tensors
         img = torch.from_numpy(img).float()
@@ -183,28 +223,39 @@ class BasicDataset(Dataset):
 
         return img, mask
 
+
     def __getitem__(self, idx):
+        """
+        Get a single data sample (image and mask) by index.
+
+        Args:
+            idx (int): Index of the sample.
+
+        Returns:
+            dict: A dictionary with 'image' and 'mask' tensors.
+        """
         name = self.ids[idx]
 
-        # Construct file names
+        # Construct file paths for image and mask
         img_file = list(self.images_dir.glob(f'{name}_p_1.*'))
         mask_file = list(self.mask_dir.glob(f'{name}_p_msk.*'))
 
         assert len(img_file) == 1, f'Either no image or multiple images found for the ID {name}: {img_file}'
         assert len(mask_file) == 1, f'Either no mask or multiple masks found for the ID {name}: {mask_file}'
 
+        # Load and preprocess image and mask
         mask = load_image(mask_file[0])
         img = load_image(img_file[0])
 
+        # Convert to tensors
         img = self.preprocess(self.mask_values, img, target_size=(256,256), is_mask=False)
         mask = self.preprocess(self.mask_values, mask, target_size=(256,256), is_mask=True, binary_class=self.binary_class)
 
         if self.train:
             # Apply augmentations only on the training dataset
             img, mask = self.apply_transforms(img, mask)
-            # Convert to tensors for training
         
-         # Convert to tensors for both train and validation
+        # Convert to tensors for both train and validation
         img = torch.from_numpy(np.array(img)).float()
         mask = torch.from_numpy(np.array(mask)).long()
         
@@ -212,13 +263,18 @@ class BasicDataset(Dataset):
             'image': img.clone().contiguous(),
             'mask': mask.clone().contiguous()
         }
-    
-        # return {
-        #     'image': torch.from_numpy(img).float(),
-        #     'mask': torch.from_numpy(mask).long()
-        # }
 
 
 class AntDataset(BasicDataset):
+    """
+    AntDataset class for loading image and mask datasets, extending BasicDataset.
+
+    Args:
+        images_dir (str): Directory containing the image files.
+        mask_dir (str): Directory containing the mask files.
+        scale (float): Scale factor for resizing images and masks.
+        binary_class (int): Optional class label for binary segmentation.
+        train (bool): Flag indicating whether the dataset is for training (True) or validation (False).
+    """
     def __init__(self, images_dir, mask_dir, scale=1, binary_class=None, train=True):
         super().__init__(images_dir, mask_dir, scale, binary_class, train)
