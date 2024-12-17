@@ -15,7 +15,7 @@ Custom Model Runs: Train or test the model with custom hyperparameters using --r
 **Usage:**
 1. Running the Model
 The script supports several arguments for customization:
-- File Format: Use --file_format to specify the image format. Set True for .jpg files or False for .png files.
+- File Format: Use --file_format to specify the image format. Set True for .jpg files or False for .png files of a specific body part.
 - Hyperparameters: When using --run_model, you can specify hyperparameters such as:
 --learning_rate: Set the learning rate for training.
 --hidden_nodes: Define the number of nodes in the second added fully connected layer.
