@@ -1,6 +1,6 @@
 # U-Net: Ant Body Part Segmentation with PyTorch
 
-![Sample Input and Output](/../casent0172857_p_1_pair.png)
+![Sample Input and Output](../casent0172857_p_1_pair.png)
 
 ---
 
@@ -27,7 +27,7 @@ This code is designed to assist with automated ant body part segmentation for bi
 3. [Installation](#installation)  
 4. [Training the Model](#training-the-model) 
 5. [Evaluation](#evaluation)   
-6. [Making Predictions](#making-predictions)  
+6. [Predicting Masks](#predicting-masks)  
 7. [Credits](#credits)  
 
 ---
@@ -89,6 +89,8 @@ data/
 The dataset primarily features **side-profile images of ants**, where the typical body part order (from left to right) is:
 
 - **Head** (and eye) → **Thorax** → **Abdomen**
+
+![Sample Input]()
 
 However, there are exceptions where ants might be flipped, and this segmentation model accounts for such variations.
 
@@ -197,5 +199,5 @@ INFO: Processing complete.
 This implementation is based on the U-Net model originally made by **[milesial](https://github.com/milesial/Pytorch-UNet)**.
 
 ## Original Paper
-**U-Net: Convolutional Networks for Biomedical Image Segmentation**
+**[U-Net: Convolutional Networks for Biomedical Image Segmentation](https://arxiv.org/abs/1505.04597)**
 By Olaf Ronneberger, Philipp Fischer, Thomas Brox.
