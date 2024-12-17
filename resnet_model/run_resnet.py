@@ -26,7 +26,7 @@ def main():
 
     # Get and standardize the RGB columns for bodypart
     df = pd.read_csv(args.path_df)
-    df_rgb = get_bodypart_rgb_values(df, args.body_part)
+    df_rgb = get_bodypart_rgb_values(df, args.body_part, 'file_'+ args.body_part)
 
     # Transformations
     transform = transforms.Compose([
@@ -70,10 +70,10 @@ def main():
                 nn.Sigmoid())  
 
         output_colors,target_colors = train_resnet18(train_dataset, val_dataset,layers_model,
-                                                            hparams,f'output_training/run_{current_time}/models/baseline_model_epochs_5.pth',num_epochs = 5)
+                                                            hparams,f'output_training/run_{current_time}/models/model_{args.body_part}_epochs_5.pth',num_epochs = 5)
 
-        save_data(f'output_training/run_{current_time}/output_colors/output_colors_baseline.npy',output_colors)
-        save_data(f'output_training/run_{current_time}/target_colors/target_colors_baseline.npy',target_colors)
+        save_data(f'output_training/run_{current_time}/output_colors/output_colors_{args.body_part}.npy',output_colors)
+        save_data(f'output_training/run_{current_time}/target_colors/target_colors_{args.body_part}.npy',target_colors)
         print('Run completed')
 
 
