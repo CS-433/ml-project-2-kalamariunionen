@@ -13,22 +13,37 @@ In the file analysis_resnet.ipynb all models are loaded and the results analysed
 Best preforming model weights for thorax prediciton is under ....
 
 
-#### Resnet model
-To predict the color of ants ResNET 18 was used with pre-trained weights. The used weights are availible in the repository under ...
+### Resnet model
+#### Features:
+**Pretrained Weights:** The pretrained ResNet18 weights are included in the repository under the 'weights' folder and are automatically loaded during training.
+**Three Modes of Operation:**
+Baseline Model: Run the baseline model using --run_baseline.
+Hyperparameter Tuning: Perform grid search for hyperparameter optimization using --run_hypertuning.
+Custom Model Runs: Train or test the model with custom hyperparameters using --run_model.
 
-The model can be run in 3 different modes. The Baseline model 
---run_baseline
-For hypertuning
---run_hypertuning
-Run model
---run_model
+**Usage:**
+1. Running the Model
+The script supports several arguments for customization:
+- File Format: Use --file_format to specify the image format. Set True for .jpg files or False for .png files.
+- Hyperparameters: When using --run_model, you can specify hyperparameters such as:
+--learning_rate: Set the learning rate for training.
+--hidden_nodes: Define the number of nodes in the second added fully connected layer.
+--batch_size: Set the batch size for training.
+- Image Path: Provide the path to the image file and any additional image-related information using relevant arguments.
+- Body Part: Specify which ant body part (head, thorax, or abdomen) to use as target variable.
 
-you can specify during run model what hyper parameters learning rate, number of nodes in 2nd added hidden layer and batch size. 
-You can specify path to image file to be run and information about images. 
-You can specify body part to run
+2. Results
+The run model is saved in a folder with the timestap for the run
+Output Files:
+The output and the target colors are saved in .pkl
+Model weights.
 
-The results will be stored in a file timestamp of the run, model weights, predicted colors and target color in .pkl format.
-The validation and training loss is stored using tensorboard and to view results using tensorboard...
+Training and validation losses are logged using TensorBoard.
+1. Run the following command to launch TensorBoard
+Viewing Results with TensorBoard:
+ ´´´tensorboard --logdir=<path_to_tensorboard_logs>´´´´
+
+ 2. Open the provided URL (typically http://localhost:6006) in your web browser to view the training metrics and loss curves.
 
 
 
