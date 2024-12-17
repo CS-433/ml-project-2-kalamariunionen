@@ -10,7 +10,7 @@ This project is in collaboration with the Department of Ecology and Evolution at
 **Three Modes of Operation:**
 Baseline Model: Run the baseline model using --run_baseline.\
 Hyperparameter Tuning: Perform grid search for hyperparameter optimization using --run_hypertuning.\
-Custom Model Runs: Train or test the model with custom hyperparameters using --run_model.\
+Custom Model Runs: Train or test the model with custom hyperparameters using --run_model.
 
 **Usage:**
 1. Running the Model
