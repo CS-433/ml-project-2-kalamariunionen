@@ -8,19 +8,15 @@
 
 This project provides a **U-Net model** implemented in **PyTorch** for the **semantic segmentation of ants** into distinct body parts. The segmentation identifies five key categories:
 
-1. **Head** (including the eye)  
+1. **Head** (excluding the eye)  
 2. **Thorax**  
 3. **Abdomen**  
-4. **Eye** (separately identifiable within the head)  
+4. **Eye**
 5. **Background**  
 
 ### Purpose
 
-This code is designed to assist with automated ant body part segmentation for biological research, entomology studies, and computer vision applications. The dataset primarily features **side-profile images of ants**, where the typical body part order (from left to right) is:
-
-- **Head** (with eye) → **Thorax** → **Abdomen**
-
-However, there are exceptions where ants might be flipped, and this segmentation model accounts for such variations.
+This code is designed to assist with automated ant body part segmentation for biological research, entomology studies, and computer vision applications. 
 
 ---
 
@@ -29,13 +25,10 @@ However, there are exceptions where ants might be flipped, and this segmentation
 1. [Pipeline Overview](#pipeline-overview)  
 2. [Dataset Structure](#dataset-structure)  
 3. [Installation](#installation)  
-4. [Training the Model](#training-the-model)  
-5. [Making Predictions](#making-predictions)  
-6. [Class Enumeration and Color Mapping](#class-enumeration-and-color-mapping)  
-7. [Evaluation](#evaluation)  
-8. [Visualization](#visualization)  
-9. [Weights & Biases Integration](#weights--biases-integration)  
-10. [Credits](#credits)  
+4. [Training the Model](#training-the-model) 
+5. [Evaluation](#evaluation)   
+6. [Making Predictions](#making-predictions)  
+7. [Credits](#credits)  
 
 ---
 
@@ -45,10 +38,10 @@ This project follows a well-defined pipeline for ant segmentation:
 
 1. **Data Preparation**:  
    - Collect side-profile images of ants.
-   - Create corresponding masks with labeled body parts.  
+   - Create corresponding masks with labelled body parts.  
 
 2. **Dataset Loading**:  
-   - Use the `BasicDataset` or `AntDataset` classes to load images and masks.  
+   - Use the `AntDataset` class to load images and masks.  
    - Masks must contain exactly **5 unique values** representing the body parts.  
 
 3. **Model Training**:  
@@ -59,10 +52,7 @@ This project follows a well-defined pipeline for ant segmentation:
    - Evaluate model performance using the Dice coefficient with `evaluate.py`.  
 
 5. **Prediction**:  
-   - Use the trained model to predict masks for new images using `predict.py`.  
-
-6. **Visualization**:  
-   - Visualize the input images and predicted masks to validate segmentation results.  
+   - Use the trained model to predict masks for new images using `predict.py`.   
 
 ---
 
@@ -72,39 +62,43 @@ This project follows a well-defined pipeline for ant segmentation:
 
 The dataset should be organized into two directories: one for images and one for masks. Each image should have a corresponding mask with the same filename structure.
 
-`data/ ├── imgs/ │ ├── ant_1_p_1.png │ ├── ant_2_p_1.png │ └── ... └── masks/ ├── ant_1_p_msk.png ├── ant_2_p_msk.png └── ...` 
+```yaml
+data/
+├── imgs/
+│   ├── ant_1_p_1.png
+│   ├── ant_2_p_1.png
+│   └── ...
+└── masks/
+    ├── ant_1_p_msk.png
+    ├── ant_2_p_msk.png
+    └── ...
+```
 
 - **Images**: RGB images of ants, typically in side profile.  
 - **Masks**: Grayscale masks with pixel values corresponding to the following categories:  
-  - **Head**  
-  - **Thorax**  
-  - **Abdomen**  
-  - **Eye**  
-  - **Background**  
 
-### Side-Profile Considerations
+| **Category** | **Original Value** | **Grayscale Value** |
+|--------------|--------------------|--------------------|
+| **Head**     | 0                  | 0                  |
+| **Thorax**   | 3                  | 100                |
+| **Abdomen**  | 4                  | 150                |
+| **Eye**      | 5                  | 200                |
+| **Background** | 6                | 255                |
 
-The dataset primarily contains ants viewed from a **side profile** with a typical left-to-right order of:
 
-- **Head** (with eye) → **Thorax** → **Abdomen**
+The dataset primarily features **side-profile images of ants**, where the typical body part order (from left to right) is:
 
-However, be aware that **some images may deviate from this setup** (e.g., different angles or partial views). The segmentation model is designed to handle these variations.
+- **Head** (and eye) → **Thorax** → **Abdomen**
+
+However, there are exceptions where ants might be flipped, and this segmentation model accounts for such variations.
 
 ---
 
 ## Installation
 
-1. **Install CUDA** (for GPU acceleration, optional):  
-   [Download CUDA](https://developer.nvidia.com/cuda-downloads)
+See this `README.md` file for installations relevant to the full project pipeline, including segmentation. 
 
-2. **Install PyTorch** (version 1.13 or later):  
-   Follow the instructions on the [PyTorch website](https://pytorch.org/get-started/locally/).
-
-3. **Install Dependencies**:
-
-   ```bash
-   pip install -r requirements.txt
-
+---
 
 ## Training the Model
 
@@ -112,7 +106,7 @@ Once you have your dataset organized and dependencies installed, you can train t
 
 ### Command to Train the Model
 
-Use the following command to start training:
+Use the following example command to start training:
 
 ```bash
 python train.py --epochs 50 --batch-size 5 --learning-rate 1e-4 --scale 0.5 --amp
@@ -153,10 +147,25 @@ Training progress, including loss curves, validation scores, and model parameter
 
 If you don’t have a W&B account, it will create an anonymous run that is deleted after 7 days.
 
-# Predicting Masks
+---
+
+## Evaluation
+Evaluate the model's performance on the validation dataset using the `evaluate.py` script.
+
+```bash
+python evaluate.py
+```
+
+The script calculates the Dice coefficient for the predicted masks. The background class is excluded from this calculation to focus on the ant's body parts.
+
+The background class is hard-coded as class 4 (mapped from the original value 6). If the dataset changes or the class enumeration changes, update the background_class parameter in the evaluate function accordingly.
+
+---
+
+## Predicting Masks
 Once the model is trained, you can use it to predict segmentation masks on new images using the `predict.py` script.
 
-## Command to Predict Masks
+### Command to Predict Masks
 ```bash
 python predict.py --model MODEL.pth --input-dir ./data/imgs --output-dir ./predictions --viz
 ```
@@ -182,51 +191,10 @@ INFO: Visualizing results for image ./data/imgs/ant_1_p_1.png, close the window 
 INFO: Processing complete.
 ```
 
-# Data structure
-Ensure your dataset follows this structure:
-
-```yaml
-data/
-├── imgs/
-│   ├── ant_1_p_1.png
-│   ├── ant_2_p_1.png
-│   └── ...
-└── masks/
-    ├── ant_1_p_msk.png
-    ├── ant_2_p_msk.png
-    └── ...
-```
-
-## Image
-RGB images of ants, typically in side profile.
-
-## Masks
-Grayscale masks with pixel values corresponding to the following categories:
-
-### Masks Table
-
-| **Category** | **Original Value** | **Grayscale Value** |
-|--------------|--------------------|--------------------|
-| **Head**     | 0                  | 0                  |
-| **Thorax**   | 3                  | 100                |
-| **Abdomen**  | 4                  | 150                |
-| **Eye**      | 5                  | 200                |
-| **Background** | 6                | 255                |
-
-
-# Evaluation
-Evaluate the model's performance on the validation dataset using the `evaluate.py` script.
-
-```bash
-python evaluate.py
-```
-
-The script calculates the Dice coefficient for the predicted masks. The background class is excluded from this calculation to focus on the ant's body parts.
-
-The background class is hard-coded as class 4 (mapped from the original value 6). If the dataset changes or the class enumeration changes, update the background_class parameter in the evaluate function accordingly.
+---
 
 # Credits
-This implementation is based on the original U-Net model by **[milesial](https://github.com/milesial/Pytorch-UNet)**.
+This implementation is based on the U-Net model originally made by **[milesial](https://github.com/milesial/Pytorch-UNet)**.
 
 ## Original Paper
 **U-Net: Convolutional Networks for Biomedical Image Segmentation**
