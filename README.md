@@ -49,6 +49,25 @@ tensorboard --logdir=<path_to_tensorboard_logs>
  3. Open the provided URL (typically http://localhost:6006) in your web browser to view the training metrics and loss curves.
 
 
+## How to run code
+
+```console  
+git clone 
+```
+
+Navigate to the cloned directory
+
+```console
+cd 
+```
+
+Start the ...:
+
+```console
+python
+```
+
+
 Remember: We need to cite all external libraries used.
 
 
