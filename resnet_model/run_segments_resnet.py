@@ -16,9 +16,9 @@ if torch.cuda.is_available():
     print(f"Cuda is availible using device '{device}'")
 
 path_df = '../colour_ants.csv'
-images_dir = '../../data/AntProject/magenta_ants'
+images_dir = '../../data/AntProject/cropped_thorax'
 
-body_parts = ['head','thorax','abdomen']
+body_parts = ['thorax']
 
 # Transformations
 transform = transforms.Compose([
