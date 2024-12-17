@@ -60,7 +60,7 @@ for body_part in body_parts:
     print("Running model with hyperparameters:")
     print(f"  Body part: {body_part}")
 
-    hparams = {'lr': 0.001, 'batch_size': 256, 'nodes': 512}
+    hparams = {'lr': 0.001, 'batch_size': 256, 'nodes': 256}
     
     layers_model = nn.Sequential(
             nn.Linear(512, hparams['nodes']),  
