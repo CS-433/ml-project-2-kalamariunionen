@@ -1,4 +1,4 @@
-## Ant color detection
+# ML4 Science Ant color detection
 This project is in collaboration with the Department of Ecology and Evolution at UNIL. The goal of the project is to use Machine Learning to be able to predict the RGB values of 3 different body parts of the ant; head, thorax and abdomen. Two machine learning models have been developed to be used in a pipeline to predict the color of ants using images.
 
 #### Pipeline overview
