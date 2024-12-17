@@ -1,6 +1,6 @@
 # U-Net: Ant Body Part Segmentation with PyTorch
 
-![Sample Input and Output](/Users/yasminekroknes-gomez/ml-project-2-kalamariunionen/casent0172857_p_1_pair.png)
+![Sample Input and Output](/../casent0172857_p_1_pair.png)
 
 ---
 
