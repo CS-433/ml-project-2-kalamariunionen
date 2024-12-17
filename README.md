@@ -15,6 +15,7 @@ Best preforming model weights for thorax prediciton is under ....
 ### Resnet model
 #### Features:
 **Pretrained Weights:** The pretrained ResNet18 weights are included in the repository under the 'weights' folder and are automatically loaded during training.
+
 **Three Modes of Operation:**
 Baseline Model: Run the baseline model using --run_baseline.
 Hyperparameter Tuning: Perform grid search for hyperparameter optimization using --run_hypertuning.
