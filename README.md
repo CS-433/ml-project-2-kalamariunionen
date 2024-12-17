@@ -1,7 +1,5 @@
 # ML4 Science Ant color detection
-This project is in collaboration with the Department of Ecology and Evolution at UNIL. The goal of the project is to use Machine Learning to be able to predict the RGB values of 3 different body parts of the ant; head, thorax and abdomen. Two machine learning models have been developed to be used in a pipeline to predict the color of ants using images. The first model is a segmentation model in order to extract the body parts of the ants ...
-
-The second model is a resnet used to make the predictions of the RGB values from the images. This model has been evaluated when just using the images and when using the segments of the ant. Prediction of thorax was also evaluated when cropping the image to only contain the thorax segment. Doing this provided the best preforming estimations. MSE was used as the metric to evaluate the preformance and compare models to each other. 
+This project is in collaboration with the Department of Ecology and Evolution at UNIL. The goal of the project is to use Machine Learning to be able to predict the RGB values of 3 different body parts of the ant; head, thorax and abdomen. Two machine learning models have been developed to be used in a pipeline to predict the color of ants using images. The first model is a segmentation model in order to extract the body parts of the ants. The second model is a resnet used to make the predictions of the RGB values from the images. The ResNet model has been evaluated when just using the original images and when using the images of the segments of the ants. MSE loss was used as the metric to evaluate the preformance and compare models to each other. 
 
 #### Pipeline overview
 
