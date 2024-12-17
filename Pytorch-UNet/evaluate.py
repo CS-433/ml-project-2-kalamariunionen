@@ -4,9 +4,31 @@ from tqdm import tqdm
 
 from utils.dice_score import multiclass_dice_coeff, dice_coeff
 
+# The background class is hard-coded here with a default value of 4.
+# This was derived from the unique classes in the dataset being enumerated as 0, 3, 4, 5, 6.
+# In this case, the background value 6 was mapped to 4 (when enumerated as 0, 1, 2, 3, 4).
+# If the dataset changes or the class enumeration changes, you need to identify the new background value
+# and pass it to the `evaluate` function using the `background_class` parameter.
 
 @torch.inference_mode()
 def evaluate(net, dataloader, device, amp, background_class=4):
+    """
+    Evaluate the performance of a segmentation model using the Dice coefficient.
+
+    This function evaluates the model on a given validation dataset and computes
+    the Dice coefficient to measure segmentation performance. For multi-class
+    segmentation, it excludes the background class when computing the Dice score.
+
+    Args:
+        net: The neural network model (should have `n_classes` attribute).
+        dataloader: DataLoader providing batches of images and corresponding masks.
+        device: The device (CPU or GPU) on which to perform the evaluation.
+        amp: Boolean indicating whether to use Automatic Mixed Precision (AMP).
+        background_class: The index of the background class to exclude when calculating the Dice score for multi-class segmentation.
+
+    Returns:
+        The average Dice score over all validation batches.
+    """
     net.eval()
     num_val_batches = len(dataloader)
     dice_score = 0

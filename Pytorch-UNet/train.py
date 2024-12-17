@@ -1,26 +1,25 @@
 import argparse
 import logging
 import os
-import random
-import sys
+from pathlib import Path
+
+import wandb
+from tqdm import tqdm
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision.transforms as transforms
-import torchvision.transforms.functional as TF
-from pathlib import Path
 from torch import optim
 from torch.utils.data import DataLoader, random_split
 from torch.optim.lr_scheduler import OneCycleLR
-from tqdm import tqdm
 
-import wandb
 from evaluate import evaluate
 from unet import UNet
 from utils.data_loading import BasicDataset, AntDataset
 from utils.dice_score import dice_loss
 from utils.focal_loss import focal_loss_wrapper
 
+# Directory paths for images, masks, and model checkpoints
 dir_img = Path('../images_folder_5/')
 dir_mask = Path('../masks_folder_5/')
 dir_checkpoint = Path('../checkpoints/')
@@ -37,36 +36,52 @@ def train_model(
         img_scale: float = 0.5,
         amp: bool = False,
         weight_decay: float = 1e-8,
-        momentum: float = 0.999,
         gradient_clipping: float = 1.0,
 ):
-    # 1. Create dataset
+    """
+    Function to train a U-Net model on image and mask datasets.
+
+    Args:
+        model: The U-Net model.
+        device: The device (CPU or GPU) for training.
+        epochs: Number of training epochs.
+        batch_size: Batch size for the DataLoader.
+        learning_rate: Learning rate for the optimizer.
+        val_percent: Proportion of data to use for validation.
+        save_checkpoint: Whether to save model checkpoints.
+        img_scale: Scaling factor for images.
+        amp: Whether to use Automatic Mixed Precision (AMP).
+        weight_decay: Weight decay (L2 regularization) for the optimizer.
+        momentum: Momentum for the optimizer.
+        gradient_clipping: Max norm for gradient clipping.
+    """
+
+    # Create dataset
     try:
         binary_class = 1 if model.n_classes == 2 else None
         full_dataset = AntDataset(dir_img, dir_mask, img_scale, binary_class=binary_class, train=True)
     except (AssertionError, RuntimeError, IndexError):
         full_dataset = BasicDataset(dir_img, dir_mask, img_scale, train=True)
 
-    # 2. Split into train / validation partitions
+    # Split dataset into training and validation sets
     n_val = int(len(full_dataset) * val_percent)
     n_train = len(full_dataset) - n_val
     train_set, val_set = random_split(full_dataset, [n_train, n_val], generator=torch.Generator().manual_seed(0))
 
+    # Get validation indices and create a validation subset
+    val_indices = val_set.indices
     if isinstance(full_dataset, AntDataset):
         val_dataset = AntDataset(dir_img, dir_mask, img_scale, binary_class=binary_class, train=False)
     else:
         val_dataset = BasicDataset(dir_img, dir_mask, img_scale, train=False)
-    
-    # Get the exact indices for the val subset
-    val_indices = val_set.indices
     val_set = torch.utils.data.Subset(val_dataset, val_indices)
 
-    # 3. Create data loaders
+    # Create data loaders for training and validation
     loader_args = dict(batch_size=batch_size, num_workers=os.cpu_count(), pin_memory=True)
     train_loader = DataLoader(train_set, shuffle=True, **loader_args)
     val_loader = DataLoader(val_set, shuffle=False, drop_last=True, **loader_args)
 
-    # (Initialize logging)
+    # Initialize logging and WandB for tracking
     experiment = wandb.init(project='U-Net2', resume='allow', anonymous='must')
     experiment.config.update(
         dict(epochs=epochs, batch_size=batch_size, learning_rate=learning_rate,
@@ -85,18 +100,16 @@ def train_model(
         Mixed Precision: {amp}
     ''')
 
-    # 4. Set up the optimizer, the loss, the learning rate scheduler and the loss scaling for AMP
+    # Set up the optimizer, scheduler, and AMP scaler
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-    # optimizer = optim.RMSprop(model.parameters(),
-    #                           lr=learning_rate, weight_decay=weight_decay, momentum=momentum, foreach=True)
-    # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=5)  # goal: maximize Dice score
     scheduler = OneCycleLR(optimizer, max_lr=5e-4, steps_per_epoch=len(train_loader), epochs=epochs)
     grad_scaler = torch.cuda.amp.GradScaler(enabled=amp)
 
+    # Loss function (Binary Cross-Entropy for binary, Cross-Entropy for multi-class)
     criterion = nn.CrossEntropyLoss() if model.n_classes > 1 else nn.BCEWithLogitsLoss()
     global_step = 0
 
-    # 5. Begin training
+    # Start training loop
     for epoch in range(1, epochs + 1):
         model.train()
         epoch_loss = 0
@@ -112,14 +125,17 @@ def train_model(
                 images = images.to(device=device, dtype=torch.float32, memory_format=torch.channels_last)
                 true_masks = true_masks.to(device=device, dtype=torch.long)
 
+                # Forward pass with AMP
                 with torch.autocast(device.type if device.type != 'mps' else 'cpu', enabled=amp):
                     masks_pred = model(images)
                     if model.n_classes == 1:
                         loss = criterion(masks_pred.squeeze(1), true_masks.float())
+                        # Can change back to dice_loss for training here
                         # loss += dice_loss(F.sigmoid(masks_pred.squeeze(1)), true_masks.float(), multiclass=False)
                         loss += focal_loss_wrapper(F.sigmoid(masks_pred.squeeze(1)), true_masks.float(), multiclass=False)
                     else:
                         loss = criterion(masks_pred, true_masks)
+                        # Can change back to dice_loss for training here
                         # loss += dice_loss(
                         #     F.softmax(masks_pred, dim=1).float(),
                         #     F.one_hot(true_masks, model.n_classes).permute(0, 3, 1, 2).float(),
@@ -131,6 +147,7 @@ def train_model(
                             multiclass=True
                         )
 
+                # Backward pass and optimization
                 optimizer.zero_grad(set_to_none=True)
                 grad_scaler.scale(loss).backward()
                 grad_scaler.unscale_(optimizer)
@@ -164,7 +181,6 @@ def train_model(
                                 histograms['Gradients/' + tag] = wandb.Histogram(value.grad.data.cpu())
 
                         val_score = evaluate(model, val_loader, device, amp)
-                        # scheduler.step(val_score)
 
                         logging.info('Validation Dice score: {}'.format(val_score))
                         try:
@@ -183,14 +199,16 @@ def train_model(
                         except:
                             pass
 
+        # Save checkpoint
         if save_checkpoint:
             Path(dir_checkpoint).mkdir(parents=True, exist_ok=True)
-            checkpoint_path = dir_checkpoint / f'checkpoint_no_augmented.pth'  # Single checkpoint file
+            checkpoint_path = dir_checkpoint / f'checkpoint_augmented.pth'
             torch.save(model.state_dict(), checkpoint_path)
             logging.info(f'Checkpoint saved at {checkpoint_path}')
 
 
 def get_args():
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description='Train the UNet on images and target masks')
     parser.add_argument('--epochs', '-e', metavar='E', type=int, default=50, help='Number of epochs')
     parser.add_argument('--batch-size', '-b', dest='batch_size', metavar='B', type=int, default=5, help='Batch size')
