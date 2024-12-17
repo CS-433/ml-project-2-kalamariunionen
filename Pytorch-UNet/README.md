@@ -90,7 +90,7 @@ The dataset primarily features **side-profile images of ants**, where the typica
 
 - **Head** (and eye) → **Thorax** → **Abdomen**
 
-![Sample Input]()
+![Sample Input](zsi-wgrs-ir-inv-3286_p_1.jpg)
 
 However, there are exceptions where ants might be flipped, and this segmentation model accounts for such variations.
 
@@ -143,6 +143,13 @@ Validation Dice score: 0.912
 
 ### Checkpoints
 If `--save-checkpoint` is enabled (default behavior), the model's state will be saved at the end of each epoch to the checkpoints directory. The checkpoint file will be named `checkpoint_augmented.pth`.
+
+#### Download Checkpoint
+
+You can download the pre-trained model checkpoint from Google Drive using the following link:
+
+[Download Checkpoint](https://drive.google.com/file/d/1u27VPbTzc46HWfw76UwmRVuDFWGxToD2/view?usp=drive_link)
+
 
 ### Logging with Weights & Biases
 Training progress, including loss curves, validation scores, and model parameters, is logged using Weights & Biases (W&B). The script will automatically initialize a W&B run and provide a link to the dashboard.
