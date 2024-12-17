@@ -3,21 +3,14 @@ This project is in collaboration with the Department of Ecology and Evolution at
 
 #### Pipeline overview
 
-#### Best preforming model
-For this project several models have been evaluated....
-All models and their predicted output stored...
-In the file analysis_resnet.ipynb all models are loaded and the results analysed.
-Best preforming model weights for thorax prediciton is under ....
-
-
 ### Resnet model
 #### Features:
 **Pretrained Weights:** The pretrained ResNet18 weights are included in the repository under the 'weights' folder and are automatically loaded during training.
 
 **Three Modes of Operation:**
-Baseline Model: Run the baseline model using --run_baseline.
-Hyperparameter Tuning: Perform grid search for hyperparameter optimization using --run_hypertuning.
-Custom Model Runs: Train or test the model with custom hyperparameters using --run_model.
+Baseline Model: Run the baseline model using --run_baseline.\
+Hyperparameter Tuning: Perform grid search for hyperparameter optimization using --run_hypertuning.\
+Custom Model Runs: Train or test the model with custom hyperparameters using --run_model.\
 
 **Usage:**
 1. Running the Model
@@ -44,7 +37,12 @@ Viewing Results with TensorBoard:
 tensorboard --logdir=<path_to_tensorboard_logs>
 ```
 
- 3. Open the provided URL (typically http://localhost:6006) in your web browser to view the training metrics and loss curves.
+ 2. Open the provided URL (typically http://localhost:6006) in your web browser to view the training metrics and loss curves.
+
+#### Analysis of best preforming models
+In the file analysis_resnet.ipynb all models are loaded and the results analysed.
+Best preforming model weights for thorax prediciton is under ....
+
 
 
 ## How to run code
