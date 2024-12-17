@@ -5,7 +5,6 @@ The second model is a resnet used to make the predictions of the RGB values from
 
 #### Pipeline overview
 
-
 #### Best preforming model
 For this project several models have been evaluated....
 All models and their predicted output stored...
@@ -41,12 +40,12 @@ Model weights.
 Training and validation losses are logged using TensorBoard.
 1. Run the following command to launch TensorBoard
 Viewing Results with TensorBoard:
- ´´´tensorboard --logdir=<path_to_tensorboard_logs>´´´´
 
- 2. Open the provided URL (typically http://localhost:6006) in your web browser to view the training metrics and loss curves.
+```console  
+tensorboard --logdir=<path_to_tensorboard_logs>
+```
 
-
-
+ 3. Open the provided URL (typically http://localhost:6006) in your web browser to view the training metrics and loss curves.
 
 
 Remember: We need to cite all external libraries used.
