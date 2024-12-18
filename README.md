@@ -41,9 +41,7 @@ tensorboard --logdir=<path_to_tensorboard_logs>
  2. Open the provided URL (typically http://localhost:6006) in your web browser to view the training metrics and loss curves.
 
 #### Analysis of best preforming models
-In the file analysis_resnet.ipynb all models are loaded and the results analysed.
-Best preforming model weights for thorax prediciton is under ....
-
+In the file analysis_resnet.ipynb all results from the models are loaded and the results analysed.
 
 ## How to create environment required to run code
 
