@@ -66,19 +66,12 @@ conda create --name <env> --file requirements.txt
 
 ## Sciting external packages used in code
 The project relies on the following key Python packages:
-
-[Torch](https://website-name.com](https://pytorch.org/)
-
-[Torchvision](https://website-name.com](https://pytorch.org/)](https://pytorch.org/vision/stable/index.html)
-
-[TensorBoard](https://website-name.com](https://pytorch.org/)](https://www.tensorflow.org/tensorboard/get_started)
-
+[Torch](https://pytorch.org/)
+[Torchvision](https://pytorch.org/vision/stable/index.html)
+[TensorBoard](https://www.tensorflow.org/tensorboard/get_started)
 [Pillow](https://pillow.readthedocs.io/en/stable/)
-
 [Pandas](https://pandas.pydata.org/)
-
 [Matplotlib](https://matplotlib.org/)
-
 [scikit-image](https://scikit-image.org/)
 
 
