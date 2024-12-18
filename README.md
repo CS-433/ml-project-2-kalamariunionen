@@ -45,7 +45,7 @@ In the file analysis_resnet.ipynb all models are loaded and the results analysed
 Best preforming model weights for thorax prediciton is under ....
 
 
-## How to create environment to run code
+## How to create environment required to run code
 
 ```console  
 git clone https://github.com/CS-433/ml-project-2-kalamariunionen.git
