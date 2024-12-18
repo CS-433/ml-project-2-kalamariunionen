@@ -2,6 +2,7 @@
 This project is in collaboration with the Department of Ecology and Evolution at UNIL. The goal of the project is to use Machine Learning to be able to predict the RGB values of 3 different body parts of the ant; head, thorax and abdomen. Two machine learning models have been developed to be used in a pipeline to predict the color of ants using images. The first model is a segmentation model in order to extract the body parts of the ants. The second model is a resnet used to make the predictions of the RGB values from the images. The ResNet model has been evaluated when just using the original images and when using the images of the segments of the ants. MSE loss was used as the metric to evaluate the preformance and compare models to each other. 
 
 #### Pipeline overview
+The pipeline consists of a UNet model trained to predict per pixel classification of bodyparts of ants. The UNet model and further documentation is availible under Pytorch-UNET. Then the next step after predicting the masks is to extract the images for the bodyparts. After the resnet is to be trained to predict the color of the ants. The weights for the additional layers for all of the trained resnet models for each body part can be found under output training. Below is a description on how to run the resnet model.
 
 ### Resnet model
 #### Features:
@@ -44,27 +45,41 @@ In the file analysis_resnet.ipynb all models are loaded and the results analysed
 Best preforming model weights for thorax prediciton is under ....
 
 
-
-## How to run code
+## How to create environment to run code
 
 ```console  
-git clone 
+git clone https://github.com/CS-433/ml-project-2-kalamariunionen.git
 ```
 
 Navigate to the cloned directory
 
 ```console
-cd 
+cd ml-project-2-kalamariunionen
 ```
 
-Start the ...:
+Create environment
 
 ```console
-python
+conda create --name <env> --file requirements.txt
 ```
 
 
-Remember: We need to cite all external libraries used.
+## Sciting external packages used in code
+The project relies on the following key Python packages:
+
+[Torch](https://website-name.com](https://pytorch.org/)
+
+[Torchvision](https://website-name.com](https://pytorch.org/)](https://pytorch.org/vision/stable/index.html)
+
+[TensorBoard](https://website-name.com](https://pytorch.org/)](https://www.tensorflow.org/tensorboard/get_started)
+
+[Pillow](https://pillow.readthedocs.io/en/stable/)
+
+[Pandas](https://pandas.pydata.org/)
+
+[Matplotlib](https://matplotlib.org/)
+
+[scikit-image](https://scikit-image.org/)
 
 
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/UDdkOEMs)
